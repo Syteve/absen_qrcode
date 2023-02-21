@@ -5,7 +5,11 @@ import {Text, Button, TextInput, Checkbox} from 'react-native-paper';
 // data and datatype
 import {changeValue, hidePassword, styles, value} from './logindata';
 
-export default function Login() {
+interface props {
+  submit: () => void
+}
+
+export default function Login({submit}: props) {
   // data
   const [value, setValue] = useState<value>({
     nim: '',
@@ -40,7 +44,7 @@ export default function Login() {
         value={value.nim}
         style={styles.widthfull}
         maxLength={12}
-	inputMode="numeric"
+	      inputMode="numeric"
         onChangeText={text => changeValue('nim', text)}
         right={
           value.nim !== '' ? (
@@ -53,7 +57,7 @@ export default function Login() {
         label="Password"
         value={value.password}
         style={styles.widthfull}
-	underlineStyle={styles.border}
+	      underlineStyle={styles.border}
         maxLength={12}
         secureTextEntry={hidePassword.condition}
         onChangeText={text => changeValue('password', text)}
@@ -78,7 +82,9 @@ export default function Login() {
       <Button
         mode="elevated"
         contentStyle={styles.widthfull}
-        style={styles.button}>
+        style={styles.button}
+        onPress={submit}
+        >
         Login
       </Button>
     </View>
