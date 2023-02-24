@@ -2,7 +2,7 @@ import React from 'react';
 import {View} from 'react-native';
 import {BottomNavigation, Appbar} from 'react-native-paper';
 
-import { props, styles } from './interfaces';
+import {props, styles} from './interfaces';
 
 export default function Navbar({route, render}: props) {
   const [index, setIndex] = React.useState(0);
@@ -12,9 +12,13 @@ export default function Navbar({route, render}: props) {
   return (
     <View style={styles.container}>
       <Appbar.Header style={styles.backgroundBlue}>
-        <Appbar.Content title="hello world" />
+        <Appbar.Content title="Absensi" />
+        {index === 0 ? <Appbar.Action icon="qrcode" /> : null}
       </Appbar.Header>
       <BottomNavigation
+        activeColor="white"
+        inactiveColor="gray"
+        barStyle={{backgroundColor: 'skyblue'}}
         navigationState={{index, routes}}
         onIndexChange={setIndex}
         renderScene={renderScene}
@@ -22,4 +26,3 @@ export default function Navbar({route, render}: props) {
     </View>
   );
 }
-

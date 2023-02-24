@@ -12,6 +12,10 @@ export interface hidePassword {
     icon: IconSource;
 }
 
+export interface props {
+  submit: () => void
+}
+
 export type changeValue = (key: string, value: string | boolean) => void
 
 export const styles = StyleSheet.create({
