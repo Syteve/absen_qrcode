@@ -1,69 +1,68 @@
-import {createContext, useState} from 'react';
-import {Button, Dialog, Portal, TextInput} from 'react-native-paper';
+import {useState} from 'react';
+import {Button, Dialog, Portal, Text, TextInput} from 'react-native-paper';
+import {useDispatch, useSelector} from 'react-redux';
 
+// global data
+import {setLink} from './redux/data/link';
+import {AppDispatch} from './redux/store';
+
+// ui
 import Login from './src/auth/login';
 import Home from './src/home/mahasiswa';
 import Profile from './src/home/mahasiswa/profile';
 import Navbar from './src/home/navigator';
 
-export const Url = createContext('');
-
 export default function App() {
-  const [url, setUrl] = useState('');
   const [visible, setVisible] = useState<boolean>(true);
 
   const setUrlProps = {
-    url: url,
-    setUrl: setUrl,
     visible: visible,
     setVisible: setVisible,
   };
 
-  return (
-    <Url.Provider value={url}>
-      {visible ? <SetUrl {...setUrlProps} /> : <IsLogin url={url} />}
-    </Url.Provider>
-  );
+  return visible ? <ModalSetUrl {...setUrlProps} /> : <IsLogin />;
 }
 
-interface props {
-  url: string;
-  setUrl: React.Dispatch<React.SetStateAction<string>>;
+interface modalProps {
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function SetUrl({url, setUrl, visible, setVisible}: props) {
+function ModalSetUrl({visible, setVisible}: modalProps) {
+  const [value, setValue] = useState<string>('');
+  const dispatch: AppDispatch = useDispatch();
+
+  function setGlobalUrl() {
+    dispatch(setLink(value));
+    setVisible(!visible);
+  }
+
   return (
     <Portal>
       <Dialog visible={visible}>
         <Dialog.Title>Insert Url</Dialog.Title>
         <Dialog.Content>
-          <TextInput value={url} onChangeText={setUrl} autoCorrect={false} />
+          <TextInput
+            inputMode="url"
+            autoCorrect={false}
+            value={value}
+            onChangeText={setValue}
+          />
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={() => setVisible(!visible)}>Done</Button>
+          <Button onPress={setGlobalUrl}>Done</Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>
   );
 }
 
-function IsLogin({url}: {url: string}) {
+function IsLogin() {
   const [isLogin, setIsLogin] = useState<boolean>(false);
-  const [render, setRender] = useState({home: Home, profile: Profile});
-  const route = [
-    {key: 'home', title: 'home', focusedIcon: 'home'},
-    {key: 'profile', title: 'Setting', focusedIcon: 'cog'},
-  ];
 
   function submitData() {
     setIsLogin(dataBefore => !dataBefore);
   }
 
-  return isLogin ? (
-    <Navbar route={route} render={render} />
-  ) : (
-    <Login submit={submitData} />
-  );
+  return isLogin ? <Navbar /> : <Login submit={submitData} />;
 }

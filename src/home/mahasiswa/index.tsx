@@ -4,7 +4,12 @@ import {Button} from 'react-native-paper';
 export default function Home() {
   return (
     <View style={styles.centerItems}>
-      <Button mode="contained">Scan Qrcode</Button>
+      <Button
+        labelStyle={{color: 'white'}}
+        contentStyle={{backgroundColor: '#007dd6'}}
+        mode="contained">
+        Scan Qrcode
+      </Button>
     </View>
   );
 }
