@@ -1,68 +1,89 @@
-import {useState} from 'react';
-import {Button, Dialog, Portal, Text, TextInput} from 'react-native-paper';
-import {useDispatch, useSelector} from 'react-redux';
-
-// global data
-import {setLink} from './redux/data/link';
-import {AppDispatch} from './redux/store';
+import {createContext, useState} from 'react';
 
 // ui
-import Login from './src/auth/login';
-import Home from './src/home/mahasiswa';
-import Profile from './src/home/mahasiswa/profile';
-import Navbar from './src/home/navigator';
+import Login from './src/login';
+import Home from './src/home';
+
+// data
+import {users} from './users';
+import {data, datalogin, globalData, histori} from './interfaces/appinterfaces';
+
+// defaultvalue dari globaldata
+export const GlobalData = createContext<globalData>({
+  data: {},
+  checkUser: () => true,
+  logout: () => {},
+  histori: [],
+  addHistori: () => {},
+});
 
 export default function App() {
-  const [visible, setVisible] = useState<boolean>(true);
+  // login dan logout
+  const [isLogin, setIsLogin] = useState<boolean>(false);
+  const [data, setData] = useState<data>({
+    id: 1,
+    name: '',
+  });
 
-  const setUrlProps = {
-    visible: visible,
-    setVisible: setVisible,
-  };
+  /**
+   * melakukan pengecekan data login berdasarkan variable users
+   * status berisikan data boolean yang di hasilkan dari pengecekan
+   * apakah username dan password sesuai dengan yang ada di variable users
+   * juka ada maka setData akan dijalankan
+   * setData digunakan unurk membuat globaldata name dan id yang akan digunakan
+   * di tampilan profile
+   * setelah itu variable condition akan di return sehingga menjadikan variable status
+   * menjadi bertipe data boolean
+   * kemudian setIsLogin digunakan untuk mengubah tampilan dari tampilan login ke tampilan home
+   * return condition digunakan di tampilan home untuk memberi tahu sistem apakah username
+   * dan password sudah benar
+   * jika benar akan membuat tampilan loading
+   * jika salah akan menampilkan dialog yang bertuliskan username atau password salah
+   */
+  function checkUser(value: datalogin) {
+    const status: boolean = users.some(user => {
+      const {id, name, username, password} = user;
+      const condition =
+        value.username === username && value.password === password;
 
-  return visible ? <ModalSetUrl {...setUrlProps} /> : <IsLogin />;
-}
+      if (condition) setData(databefore => ({...databefore, id, name}));
 
-interface modalProps {
-  visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-}
+      return condition;
+    });
 
-function ModalSetUrl({visible, setVisible}: modalProps) {
-  const [value, setValue] = useState<string>('');
-  const dispatch: AppDispatch = useDispatch();
+    setIsLogin(status);
+    return status;
+  }
 
-  function setGlobalUrl() {
-    dispatch(setLink(value));
-    setVisible(!visible);
+  /**
+   * melakukan logout
+   * setIsLogin(false) digunakan untuk mengubah tampilan home ke tampilan login
+   * setData digunakan unutk menghapus semua data yang telah dibuat pada saat function checkUser
+   */
+  function logout() {
+    setIsLogin(false);
+    setData(databefore => {
+      return {...databefore, name: ''};
+    });
+  }
+
+  // histori
+  /**
+   * digunakan untuk melakukan pencatatan ketika selesai melakukan scan qrcode
+   * data dari histori sendiri berisi id, url dan date
+   * id digunakan untuk melakukan pensortiran jika dalam satu perangkat terdapat
+   * banyak users yang digunakan
+   */
+  const [histori, setHistori] = useState<histori[]>([]);
+  function addHistori(value: histori) {
+    setHistori(databefore => {
+      return [...databefore, value];
+    });
   }
 
   return (
-    <Portal>
-      <Dialog visible={visible}>
-        <Dialog.Title>Insert Url</Dialog.Title>
-        <Dialog.Content>
-          <TextInput
-            inputMode="url"
-            autoCorrect={false}
-            value={value}
-            onChangeText={setValue}
-          />
-        </Dialog.Content>
-        <Dialog.Actions>
-          <Button onPress={setGlobalUrl}>Done</Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+    <GlobalData.Provider value={{data, checkUser, logout, histori, addHistori}}>
+      {isLogin ? <Home /> : <Login />}
+    </GlobalData.Provider>
   );
-}
-
-function IsLogin() {
-  const [isLogin, setIsLogin] = useState<boolean>(false);
-
-  function submitData() {
-    setIsLogin(dataBefore => !dataBefore);
-  }
-
-  return isLogin ? <Navbar /> : <Login submit={submitData} />;
 }
